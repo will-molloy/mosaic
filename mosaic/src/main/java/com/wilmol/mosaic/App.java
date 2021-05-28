@@ -6,17 +6,20 @@ import static com.google.common.io.Files.getNameWithoutExtension;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.math.IntMath;
-import ij.IJ;
 import ij.ImagePlus;
 import ij.io.FileSaver;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import java.awt.Image;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import javax.imageio.ImageIO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,37 +32,36 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  private final Path bigImagePath = Path.of("data/big-image.jpg");
-  private final Path smallImagesPath = Path.of("data/small-images");
-  private final Path combinedImageOutputPath =
-      bigImagePath.resolveSibling(
-          getNameWithoutExtension(checkNotNull(bigImagePath.getFileName()).toString())
-              + "-output.png");
-  private static final int RESIZED_SMALL_IMAGE_SIDE_LENGTH = 100;
-
-  void run() throws Exception {
+  void run(
+      Path bigImagePath,
+      double resizedBigImageScale,
+      Path smallImagesPath,
+      int resizedSmallImagesSideLength)
+      throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
     log.info("run() started");
 
-    ImagePlus bigImage = resize(IJ.openImage(bigImagePath.toString()), 1);
+    ImagePlus bigImage = resize(read(bigImagePath), resizedBigImageScale);
     checkArgument(bigImage.getType() == ImagePlus.COLOR_RGB, "Expected big image to be COLOUR_RGB");
     log.info("{}x{} big image dimensions", bigImage.getWidth(), bigImage.getHeight());
     log.info("{} elapsed", stopwatch.elapsed());
 
-    int combinedWidth = bigImage.getWidth() * RESIZED_SMALL_IMAGE_SIDE_LENGTH;
-    int combinedHeight = bigImage.getHeight() * RESIZED_SMALL_IMAGE_SIDE_LENGTH;
+    int combinedWidth = bigImage.getWidth() * resizedSmallImagesSideLength;
+    int combinedHeight = bigImage.getHeight() * resizedSmallImagesSideLength;
     log.info("{}x{} combined image dimensions", combinedWidth, combinedHeight);
     // ColourProcessor stores pixels in 1d array (width * height), so check that will work
     if (IntMath.saturatedMultiply(combinedWidth, combinedHeight) == Integer.MAX_VALUE) {
       throw new OutOfMemoryError("Combined image too big");
     }
 
+    ImagePlus.logImageListeners();
+
     List<ImagePlus> smallImages =
         Files.list(Path.of(smallImagesPath.toString()))
-            .map(path -> IJ.openImage(path.toString()))
+            .map(this::read)
             .filter(Objects::nonNull)
             .filter(image -> image.getType() == ImagePlus.COLOR_RGB)
-            .map(smallImage -> resizeSquare(smallImage, RESIZED_SMALL_IMAGE_SIDE_LENGTH))
+            .map(smallImage -> resizeSquare(smallImage, resizedSmallImagesSideLength))
             .limit(100)
             .toList();
     log.info("{} small images", smallImages.size());
@@ -75,16 +77,31 @@ class App {
     }
     for (int row = 0; row < bigImage.getHeight(); row++) {
       for (int col = 0; col < bigImage.getWidth(); col++) {
-        int[] targetPixel = bigImage.getPixel(row, col);
+        int[] targetPixel = bigImage.getPixel(col, row);
         int i = closestPoint(targetPixel, avgPixels);
         grid.get(row).set(col, smallImages.get(i));
       }
     }
 
     ImagePlus combinedImage = combine(grid);
-    //    savePng(combinedImage);
-    combinedImage.show();
+    savePng(
+        combinedImage,
+        bigImagePath.resolveSibling(
+            getNameWithoutExtension(checkNotNull(bigImagePath.getFileName()).toString())
+                + "-output.png"));
     log.info("run() finished - elapsed: {}", stopwatch.elapsed());
+  }
+
+  ImagePlus read(Path path) {
+    try {
+      Image image = ImageIO.read(path.toFile());
+      ImagePlus imagePlus = new ImagePlus();
+      imagePlus.setImage(image);
+      return imagePlus;
+    } catch (IOException e) {
+      log.catching(e);
+      throw new UncheckedIOException(e);
+    }
   }
 
   ImagePlus resize(ImagePlus image, double scale) {
@@ -92,7 +109,7 @@ class App {
   }
 
   ImagePlus resize(ImagePlus image, int width, int height) {
-    return image.resize(width, height, "average");
+    return image.resize(width, height, "none");
   }
 
   ImagePlus resizeSquare(ImagePlus image, int sideLength) {
@@ -184,12 +201,18 @@ class App {
     return combinedImage;
   }
 
-  void savePng(ImagePlus image) {
+  void savePng(ImagePlus image, Path output) {
     FileSaver fileSaver = new FileSaver(image);
-    fileSaver.saveAsPng(combinedImageOutputPath.toString());
+    fileSaver.saveAsPng(output.toString());
   }
 
   public static void main(String[] args) throws Exception {
-    new App().run();
+    Path bigImagePath = Path.of("data/big-image.jpg");
+    double bigImageScale = 1;
+
+    Path smallImagesPath = Path.of("data/small-images");
+    int smallImagesSideLength = 100;
+
+    new App().run(bigImagePath, bigImageScale, smallImagesPath, smallImagesSideLength);
   }
 }
