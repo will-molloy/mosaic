@@ -22,6 +22,7 @@ class AppTest {
 
   @Test
   void recreateTreeUsingBasicColours() throws Exception {
+    System.setProperty("java.awt.headless", "false"); // Disables headless
     Path bigImage = Path.of(Resources.getResource("AppTest/tree.jpg").toURI());
     Path smallImages = Path.of(Resources.getResource("AppTest/basic-colours").toURI());
 
