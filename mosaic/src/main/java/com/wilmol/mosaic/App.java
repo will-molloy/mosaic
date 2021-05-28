@@ -8,6 +8,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.math.IntMath;
 import ij.ImagePlus;
 import ij.io.FileSaver;
+import ij.io.Opener;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import java.awt.Image;
@@ -93,15 +94,7 @@ class App {
   }
 
   ImagePlus read(Path path) {
-    try {
-      Image image = ImageIO.read(path.toFile());
-      ImagePlus imagePlus = new ImagePlus();
-      imagePlus.setImage(image);
-      return imagePlus;
-    } catch (IOException e) {
-      log.catching(e);
-      throw new UncheckedIOException(e);
-    }
+    return new Opener().openImage(path.toString());
   }
 
   ImagePlus resize(ImagePlus image, double scale) {
