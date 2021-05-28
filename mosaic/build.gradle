@@ -1,0 +1,3 @@
+dependencies {
+  implementation group: 'net.imagej', name: 'ij', version: '1.53j'
+}
