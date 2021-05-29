@@ -22,9 +22,11 @@ class AppTest {
 
     app.run(bigImage, 1, smallImages, 1);
 
-    Image actual = Image.read(Path.of(Resources.getResource("AppTest/tree-output.png").toURI()));
+    Image actual =
+        Image.read(Path.of(Resources.getResource("AppTest/tree-output.png").toURI())).orElseThrow();
     Image expected =
-        Image.read(Path.of(Resources.getResource("AppTest/expected-tree-output.png").toURI()));
+        Image.read(Path.of(Resources.getResource("AppTest/expected-tree-output.png").toURI()))
+            .orElseThrow();
     assertThat(actual).isEqualTo(expected);
   }
 }

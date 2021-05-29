@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +38,8 @@ class App {
         resizedSmallImagesSideLength);
 
     log.info("Reading big image");
-    Image bigImage = Image.read(bigImagePath).resize(resizedBigImageScale);
+    Image bigImage =
+        Image.read(bigImagePath).map(i -> i.resize(resizedBigImageScale)).orElseThrow();
     log.info("{}x{} big image dimensions", bigImage.width(), bigImage.height());
     log.info("{} elapsed", stopwatch.elapsed());
 
@@ -52,8 +54,8 @@ class App {
     List<Image> smallImages =
         Files.list(Path.of(smallImagesPath.toString()))
             .map(Image::read)
+            .flatMap(Optional::stream)
             .map(smallImage -> smallImage.resizeSquare(resizedSmallImagesSideLength))
-            .limit(100)
             .toList();
     log.info("{} small images", smallImages.size());
     log.info("{} elapsed", stopwatch.elapsed());

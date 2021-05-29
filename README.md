@@ -5,6 +5,11 @@
 
 recreate a big image from smaller images
 
+## Example:
+
+@JiDevOps recreated using puppies
+![Example](./data/example.png)
+
 ## Running the app
 
 ### Requirements:

@@ -10,6 +10,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.IntStream;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -127,11 +128,15 @@ final class Image {
         .toList();
   }
 
-  static Image read(Path path) {
+  static Optional<Image> read(Path path) {
     log.info("read({})", path);
     try {
       BufferedImage bufferedImage = ImageIO.read(path.toFile());
-      return new Image(bufferedImage);
+      if (bufferedImage == null) {
+        log.warn("image read from path {} was null", path);
+        return Optional.empty();
+      }
+      return Optional.of(new Image(bufferedImage));
     } catch (IOException e) {
       throw uncheckedIoException("Error reading image", e);
     }
