@@ -3,12 +3,7 @@ package com.wilmol.mosaic;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.io.Resources;
-import com.google.common.primitives.Ints;
-import ij.IJ;
-import ij.ImagePlus;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,23 +20,12 @@ class AppTest {
     Path bigImage = Path.of(Resources.getResource("AppTest/tree.jpg").toURI());
     Path smallImages = Path.of(Resources.getResource("AppTest/basic-colours").toURI());
 
-    app.run(bigImage, 0.1, smallImages, 1);
+    Image actual = app.run(bigImage, 0.05, smallImages, 1);
 
-    ImagePlus actual =
-        IJ.openImage(Path.of(Resources.getResource("AppTest/tree-output.png").toURI()).toString());
-    ImagePlus expected =
-        IJ.openImage(
-            Path.of(Resources.getResource("AppTest/expected-tree-output.png").toURI()).toString());
-    assertThat(toPixels(actual)).isEqualTo(toPixels(expected));
-  }
-
-  private List<List<List<Integer>>> toPixels(ImagePlus image) {
-    return IntStream.range(0, image.getHeight())
-        .mapToObj(
-            h ->
-                IntStream.range(0, image.getWidth())
-                    .mapToObj(w -> Ints.asList(image.getPixel(w, h)))
-                    .toList())
-        .toList();
+    Image expected =
+        Image.read(Path.of(Resources.getResource("AppTest/expected-tree-output.png").toURI()))
+            .orElseThrow();
+    assertThat(actual.uniquePixels()).containsExactlyElementsIn(expected.uniquePixels());
+    assertThat(actual).isEqualTo(expected);
   }
 }
