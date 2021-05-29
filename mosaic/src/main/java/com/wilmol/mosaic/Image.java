@@ -32,6 +32,9 @@ final class Image {
 
   private static final Logger log = LogManager.getLogger();
 
+  private static final Set<Integer> RGB_TYPES =
+      Set.of(BufferedImage.TYPE_INT_RGB, BufferedImage.TYPE_INT_BGR, BufferedImage.TYPE_3BYTE_BGR);
+
   private final BufferedImage bufferedImage;
 
   private Image(BufferedImage image) {
@@ -39,21 +42,7 @@ final class Image {
         IntMath.saturatedMultiply(image.getWidth(), image.getHeight()) < Integer.MAX_VALUE,
         "Image too big");
 
-    if (image.getType() == BufferedImage.TYPE_INT_RGB) {
-      this.bufferedImage = image;
-    } else {
-      this.bufferedImage = convertToTypeIntRgb(image);
-    }
-  }
-
-  private static BufferedImage convertToTypeIntRgb(BufferedImage image) {
-    log.debug("converting image to BufferedImage.TYPE_INT_RGB");
-    BufferedImage convertedImage =
-        new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-    Graphics graphics = convertedImage.getGraphics();
-    graphics.drawImage(image, 0, 0, null);
-    graphics.dispose();
-    return convertedImage;
+    this.bufferedImage = image;
   }
 
   int width() {
@@ -85,6 +74,8 @@ final class Image {
   }
 
   RgbPixel getPixel(int x, int y) {
+    checkArgument(x >= 0 && x < width(), "x out of bounds");
+    checkArgument(y >= 0 && y < height(), "y out of bounds");
     int[] pixel = bufferedImage.getRaster().getPixel(x, y, new int[3]);
     return new RgbPixel(pixel[0], pixel[1], pixel[2]);
   }
@@ -146,12 +137,17 @@ final class Image {
   static Optional<Image> read(Path path) {
     log.info("read({})", path);
     try {
-      BufferedImage bufferedImage = ImageIO.read(path.toFile());
-      if (bufferedImage == null) {
+      BufferedImage image = ImageIO.read(path.toFile());
+      if (image == null) {
         log.warn("image read from path {} was null", path);
         return Optional.empty();
       }
-      return Optional.of(new Image(bufferedImage));
+      if (!RGB_TYPES.contains(image.getType())) {
+        log.warn(
+            "image read from path {} is not RGB (BufferedImage.type={})", path, image.getType());
+        return Optional.empty();
+      }
+      return Optional.of(new Image(image));
     } catch (IOException e) {
       throw uncheckedIoException("Error reading image", e);
     }
