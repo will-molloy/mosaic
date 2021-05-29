@@ -122,6 +122,11 @@ final class Image {
     return Objects.hash(pixels());
   }
 
+  @Override
+  public String toString() {
+    return "Image{" + "pixels=" + pixels() + '}';
+  }
+
   private List<List<RgbPixel>> pixels() {
     return IntStream.range(0, width())
         .mapToObj(x -> IntStream.range(0, height()).mapToObj(y -> getPixel(x, y)).toList())
