@@ -96,6 +96,7 @@ final class Image {
   }
 
   void savePng(Path path) {
+    log.info("savePng({})", path);
     try {
       ImageIO.write(bufferedImage, "png", path.toFile());
     } catch (IOException e) {
@@ -127,6 +128,7 @@ final class Image {
   }
 
   static Image read(Path path) {
+    log.info("read({})", path);
     try {
       BufferedImage bufferedImage = ImageIO.read(path.toFile());
       return new Image(bufferedImage);

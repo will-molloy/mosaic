@@ -29,8 +29,14 @@ class App {
       int resizedSmallImagesSideLength)
       throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
-    log.info("run() started");
+    log.info(
+        "run(bigImagePath={}, resizedBigImageScale={}, smallImagesPath={}, resizedSmallImagesSideLength={}) started",
+        bigImagePath,
+        resizedBigImageScale,
+        smallImagesPath,
+        resizedSmallImagesSideLength);
 
+    log.info("Reading big image");
     Image bigImage = Image.read(bigImagePath).resize(resizedBigImageScale);
     log.info("{}x{} big image dimensions", bigImage.width(), bigImage.height());
     log.info("{} elapsed", stopwatch.elapsed());
@@ -42,6 +48,7 @@ class App {
       throw new OutOfMemoryError("Combined image too big");
     }
 
+    log.info("Reading small images");
     List<Image> smallImages =
         Files.list(Path.of(smallImagesPath.toString()))
             .map(Image::read)
@@ -51,10 +58,11 @@ class App {
     log.info("{} small images", smallImages.size());
     log.info("{} elapsed", stopwatch.elapsed());
 
-    // preprocess smaller images avg pixel value
+    log.info("Preprocessing smaller images avg pixel value");
     List<RgbPixel> avgPixels = smallImages.stream().map(Image::averagePixel).toList();
+    log.info("{} elapsed", stopwatch.elapsed());
 
-    // select smaller images to replace each big image pixel
+    log.info("Selecting smaller images to replace each big image pixel");
     List<List<Image>> grid = new ArrayList<>();
     for (int row = 0; row < bigImage.height(); row++) {
       grid.add(new ArrayList<>(Collections.nCopies(bigImage.width(), null)));
@@ -66,8 +74,13 @@ class App {
         grid.get(row).set(col, smallImages.get(i));
       }
     }
+    log.info("{} elapsed", stopwatch.elapsed());
 
+    log.info("Combining images");
     Image combinedImage = Image.combinedImage(grid);
+    log.info("{} elapsed", stopwatch.elapsed());
+
+    log.info("Saving combined image");
     combinedImage.savePng(
         bigImagePath.resolveSibling(
             getNameWithoutExtension(checkNotNull(bigImagePath.getFileName()).toString())
@@ -94,10 +107,10 @@ class App {
 
   public static void main(String[] args) throws Exception {
     Path bigImagePath = Path.of("data/big-image.jpg");
-    double bigImageScale = 1;
+    double bigImageScale = 0.2;
 
     Path smallImagesPath = Path.of("data/small-images");
-    int smallImagesSideLength = 100;
+    int smallImagesSideLength = 80;
 
     new App().run(bigImagePath, bigImageScale, smallImagesPath, smallImagesSideLength);
   }
