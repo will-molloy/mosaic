@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -193,9 +192,5 @@ final class Image {
   private static UncheckedIOException uncheckedIoException(String msg, IOException e) {
     log.error(msg, e);
     throw new UncheckedIOException(msg, e);
-  }
-
-  Set<RgbPixel> uniquePixels() {
-    return pixels().stream().flatMap(List::stream).collect(Collectors.toSet());
   }
 }

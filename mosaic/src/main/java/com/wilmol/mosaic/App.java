@@ -93,7 +93,7 @@ class App {
   }
 
   // returns index
-  int closestPoint(RgbPixel target, List<RgbPixel> points) {
+  private int closestPoint(RgbPixel target, List<RgbPixel> points) {
     int minDistance = Integer.MAX_VALUE;
     int minI = 0;
     for (int i = 0; i < points.size(); i++) {

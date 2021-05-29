@@ -25,7 +25,6 @@ class AppTest {
     Image expected =
         Image.read(Path.of(Resources.getResource("AppTest/expected-tree-output.png").toURI()))
             .orElseThrow();
-    assertThat(actual.uniquePixels()).containsExactlyElementsIn(expected.uniquePixels());
     assertThat(actual).isEqualTo(expected);
   }
 }
