@@ -5,6 +5,7 @@ import static com.google.common.io.Files.getNameWithoutExtension;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.math.IntMath;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  void run(
+  @CanIgnoreReturnValue
+  Image run(
       Path bigImagePath,
       double resizedBigImageScale,
       Path smallImagesPath,
@@ -87,6 +89,7 @@ class App {
             getNameWithoutExtension(checkNotNull(bigImagePath.getFileName()).toString())
                 + "-output.png"));
     log.info("run() finished - elapsed: {}", stopwatch.elapsed());
+    return combinedImage;
   }
 
   // returns index
