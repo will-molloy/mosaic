@@ -38,8 +38,7 @@ class App {
         resizedSmallImagesSideLength);
 
     log.info("Reading big image");
-    Image bigImage =
-        Image.read(bigImagePath).map(i -> i.resize(resizedBigImageScale)).orElseThrow();
+    Image bigImage = Image.read(bigImagePath).orElseThrow().resize(resizedBigImageScale);
     log.info("{}x{} big image dimensions", bigImage.width(), bigImage.height());
     log.info("{} elapsed", stopwatch.elapsed());
 

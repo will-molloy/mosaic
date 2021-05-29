@@ -40,14 +40,18 @@ final class Image {
     if (image.getType() == BufferedImage.TYPE_INT_RGB) {
       this.bufferedImage = image;
     } else {
-      log.debug("converting image");
-      BufferedImage convertedImage =
-          new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-      Graphics graphics = convertedImage.getGraphics();
-      graphics.drawImage(image, 0, 0, null);
-      graphics.dispose();
-      this.bufferedImage = convertedImage;
+      this.bufferedImage = convertToTypeIntRgb(image);
     }
+  }
+
+  private static BufferedImage convertToTypeIntRgb(BufferedImage image) {
+    log.debug("converting image to BufferedImage.TYPE_INT_RGB");
+    BufferedImage convertedImage =
+        new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+    Graphics graphics = convertedImage.getGraphics();
+    graphics.drawImage(image, 0, 0, null);
+    graphics.dispose();
+    return convertedImage;
   }
 
   int width() {
@@ -59,7 +63,11 @@ final class Image {
   }
 
   Image resize(int width, int height) {
+    if (width == width() && height == height()) {
+      return this;
+    }
     try {
+      log.debug("resizing image");
       return new Image(Thumbnails.of(bufferedImage).forceSize(width, height).asBufferedImage());
     } catch (IOException e) {
       throw uncheckedIoException("Error resizing image", e);
@@ -128,8 +136,8 @@ final class Image {
   }
 
   private List<List<RgbPixel>> pixels() {
-    return IntStream.range(0, width())
-        .mapToObj(x -> IntStream.range(0, height()).mapToObj(y -> getPixel(x, y)).toList())
+    return IntStream.range(0, height())
+        .mapToObj(y -> IntStream.range(0, width()).mapToObj(x -> getPixel(x, y)).toList())
         .toList();
   }
 
