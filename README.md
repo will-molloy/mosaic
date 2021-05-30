@@ -7,8 +7,9 @@ recreate a big image from smaller images
 
 ## Example
 
-> Toby recreated from various pets
-<p align="center"> <img src=data/example.jpg> <img src=data/example-output.png></p>
+|<img src=data/example.jpg width=200>|<img src=data/example-output.jpg width=200>|
+|---|---|
+|*Toby*|*Toby recreated from various pets*|
 
 ## Running the app
 

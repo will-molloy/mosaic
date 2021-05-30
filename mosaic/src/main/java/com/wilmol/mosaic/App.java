@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -110,10 +109,10 @@ class App {
   }
 
   public static void main(String[] args) throws Exception {
-    Path bigImagePath = Path.of("data/toby.jpg");
+    Path bigImagePath = Path.of("data/big-image.jpg");
     double bigImageScale = 0.25;
 
-    Path smallImagesPath = Path.of("data/pets");
+    Path smallImagesPath = Path.of("data/small-images");
     int smallImagesSideLength = 50;
 
     new App().run(bigImagePath, bigImageScale, smallImagesPath, smallImagesSideLength);

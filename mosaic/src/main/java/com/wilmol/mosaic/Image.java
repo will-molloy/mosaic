@@ -57,7 +57,7 @@ final class Image {
       return this;
     }
     try {
-      log.debug("resizing image ({}x{} to {}x{})", width(), height(), width, height);
+      log.debug("resizing image from {}x{} to {}x{}", width(), height(), width, height);
       return new Image(Thumbnails.of(bufferedImage).forceSize(width, height).asBufferedImage());
     } catch (IOException e) {
       throw uncheckedIoException("Error resizing image", e);
