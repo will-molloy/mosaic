@@ -5,6 +5,11 @@
 
 recreate a big image from smaller images
 
+## Example
+
+> Toby recreated from various pets
+<p align="center"> <img src=data/example.jpg> <img src=data/example-output.png></p>
+
 ## Running the app
 
 ### Requirements:

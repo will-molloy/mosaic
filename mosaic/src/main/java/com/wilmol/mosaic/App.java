@@ -5,13 +5,13 @@ import static com.google.common.io.Files.getNameWithoutExtension;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.math.IntMath;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,8 +24,7 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
-  @CanIgnoreReturnValue
-  Image run(
+  void run(
       Path bigImagePath,
       double resizedBigImageScale,
       Path smallImagesPath,
@@ -57,6 +56,8 @@ class App {
             .map(Image::read)
             .flatMap(Optional::stream)
             .map(smallImage -> smallImage.resizeSquare(resizedSmallImagesSideLength))
+            // TODO ImageIO is synchronised so this does nothing?
+            .parallel()
             .toList();
     log.info("{} small images", smallImages.size());
     log.info("{} elapsed", stopwatch.elapsed());
@@ -89,7 +90,6 @@ class App {
             getNameWithoutExtension(checkNotNull(bigImagePath.getFileName()).toString())
                 + "-output.png"));
     log.info("run() finished - elapsed: {}", stopwatch.elapsed());
-    return combinedImage;
   }
 
   // returns index
@@ -110,11 +110,11 @@ class App {
   }
 
   public static void main(String[] args) throws Exception {
-    Path bigImagePath = Path.of("data/big-image.jpg");
-    double bigImageScale = 0.2;
+    Path bigImagePath = Path.of("data/toby.jpg");
+    double bigImageScale = 0.25;
 
-    Path smallImagesPath = Path.of("data/small-images");
-    int smallImagesSideLength = 80;
+    Path smallImagesPath = Path.of("data/pets");
+    int smallImagesSideLength = 50;
 
     new App().run(bigImagePath, bigImageScale, smallImagesPath, smallImagesSideLength);
   }
