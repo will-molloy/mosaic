@@ -66,3 +66,5 @@ atlassian-ide-plugin.xml
 .nbattrs
 
 data/
+!data/example.jpg
+!data/example-output.png
