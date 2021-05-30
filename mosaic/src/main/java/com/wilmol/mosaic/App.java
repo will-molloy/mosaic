@@ -5,12 +5,10 @@ import static com.google.common.io.Files.getNameWithoutExtension;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.math.IntMath;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,10 +21,12 @@ class App {
 
   private static final Logger log = LogManager.getLogger();
 
+  private final SmallImagesLoader smallImagesLoader = new SmallImagesLoader();
+
   void run(
       Path bigImagePath,
       double resizedBigImageScale,
-      Path smallImagesPath,
+      Path smallImagesDirectory,
       int resizedSmallImagesSideLength)
       throws Exception {
     Stopwatch stopwatch = Stopwatch.createStarted();
@@ -34,7 +34,7 @@ class App {
         "run(bigImagePath={}, resizedBigImageScale={}, smallImagesPath={}, resizedSmallImagesSideLength={}) started",
         bigImagePath,
         resizedBigImageScale,
-        smallImagesPath,
+        smallImagesDirectory,
         resizedSmallImagesSideLength);
 
     log.info("Reading big image");
@@ -51,13 +51,7 @@ class App {
 
     log.info("Reading small images");
     List<Image> smallImages =
-        Files.list(Path.of(smallImagesPath.toString()))
-            .map(Image::read)
-            .flatMap(Optional::stream)
-            .map(smallImage -> smallImage.resizeSquare(resizedSmallImagesSideLength))
-            // TODO ImageIO is synchronised so this does nothing?
-            .parallel()
-            .toList();
+        smallImagesLoader.loadSmallImages(smallImagesDirectory, resizedSmallImagesSideLength);
     log.info("{} small images", smallImages.size());
     log.info("{} elapsed", stopwatch.elapsed());
 
@@ -112,9 +106,9 @@ class App {
     Path bigImagePath = Path.of("data/big-image.jpg");
     double bigImageScale = 0.25;
 
-    Path smallImagesPath = Path.of("data/small-images");
+    Path smallImagesDirectory = Path.of("data/small-images");
     int smallImagesSideLength = 50;
 
-    new App().run(bigImagePath, bigImageScale, smallImagesPath, smallImagesSideLength);
+    new App().run(bigImagePath, bigImageScale, smallImagesDirectory, smallImagesSideLength);
   }
 }
