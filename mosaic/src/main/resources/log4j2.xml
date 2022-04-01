@@ -12,6 +12,6 @@
       <AppenderRef ref="console"/>
     </Root>
 
-    <Logger name="com.wilmol" level="debug"/>
+    <Logger name="com.willmolloy" level="debug"/>
   </Loggers>
 </Configuration>

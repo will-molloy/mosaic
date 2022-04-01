@@ -1,4 +1,4 @@
-package com.wilmol.mosaic;
+package com.willmolloy.mosaic;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.io.Files.getNameWithoutExtension;
@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Loads the small images for the mosaic.
  *
- * @author <a href=https://wilmol.com>Will Molloy</a>
+ * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 class SmallImagesLoader {
 
