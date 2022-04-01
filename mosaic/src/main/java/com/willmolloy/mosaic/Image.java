@@ -1,4 +1,4 @@
-package com.wilmol.mosaic;
+package com.willmolloy.mosaic;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Represents an image.
  *
- * @author <a href=https://wilmol.com>Will Molloy</a>
+ * @author <a href=https://willmolloy.com>Will Molloy</a>
  */
 @Immutable
 @ThreadSafe
